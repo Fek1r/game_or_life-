@@ -1,20 +1,19 @@
 #include <iostream>
-#include <unistd.h> // Для функции sleep
+#include <unistd.h> 
 
-const int ROWS = 20; // Количество строк в игровом поле
-const int COLS = 50; // Количество столбцов в игровом поле
+const int ROWS = 20; 
+const int COLS = 50; 
 
-// Функция для отображения текущего состояния игрового поля
 void display(char board[ROWS][COLS]) {
+    system("clear"); // Очистка экрана (работает на Unix-подобных системах)(честно спизжено с chat gpt)
     for (int i = 0; i < ROWS; ++i) {
         for (int j = 0; j < COLS; ++j) {
-            std::cout << board[i][j];
+            std::cout << (board[i][j] == '*' ? "\u25A0" : " "); // Используем юникодные символы для отображения клеток(chat gpt)
         }
         std::cout << std::endl;
     }
 }
 
-// Функция для обновления состояния игрового поля на следующий шаг
 void update(char board[ROWS][COLS]) {
     char newBoard[ROWS][COLS];
     for (int i = 0; i < ROWS; ++i) {
@@ -45,8 +44,8 @@ void update(char board[ROWS][COLS]) {
 }
 
 int main() {
-    char board[ROWS][COLS] = { ' ' }; // Создаем игровое поле, заполненное пробелами
-    // Начальная конфигурация игрового поля
+    char board[ROWS][COLS] = { ' ' }; 
+
     board[5][5] = '*';
     board[6][6] = '*';
     board[6][7] = '*';
@@ -54,10 +53,9 @@ int main() {
     board[7][6] = '*';
 
     while (true) {
-        display(board); // Отображаем текущее состояние игрового поля
-        update(board); // Обновляем состояние игрового поля
-        sleep(1); // Задержка в секундах
-        std::cout << "\033[2J\033[1;1H"; // Очистка терминала для отображения следующего состояния игрового поля
+        display(board); 
+        update(board);
+        usleep(60000); // ms 
     }
 
     return 0;
