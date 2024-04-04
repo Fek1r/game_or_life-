@@ -2,13 +2,13 @@
 #include <unistd.h> 
 
 const int ROWS = 20; 
-const int COLS = 50; 
+const int COLS = 40; 
 
 void display(char board[ROWS][COLS]) {
-    system("clear"); // Очистка экрана (работает на Unix-подобных системах)(честно спизжено с chat gpt)
+    system("clear"); // Очистка экрана (работает на Unix-подобных системах)
     for (int i = 0; i < ROWS; ++i) {
         for (int j = 0; j < COLS; ++j) {
-            std::cout << (board[i][j] == '*' ? "\u25A0" : " "); // Используем юникодные символы для отображения клеток(chat gpt)
+            std::cout << (board[i][j] == '*' ? "\u25A0" : " "); // Используем юникодные символы для отображения клеток
         }
         std::cout << std::endl;
     }
@@ -22,9 +22,9 @@ void update(char board[ROWS][COLS]) {
             for (int di = -1; di <= 1; ++di) {
                 for (int dj = -1; dj <= 1; ++dj) {
                     if (di == 0 && dj == 0) continue;
-                    int ni = i + di;
-                    int nj = j + dj;
-                    if (ni >= 0 && ni < ROWS && nj >= 0 && nj < COLS && board[ni][nj] == '*') {
+                    int ni = (i + di + ROWS) % ROWS; // Обработка границы по вертикали
+                    int nj = (j + dj + COLS) % COLS; // Обработка границы по горизонтали
+                    if (board[ni][nj] == '*') {
                         ++neighbors;
                     }
                 }
@@ -46,16 +46,16 @@ void update(char board[ROWS][COLS]) {
 int main() {
     char board[ROWS][COLS] = { ' ' }; 
 
-    board[5][5] = '*';
-    board[6][6] = '*';
-    board[6][7] = '*';
-    board[7][5] = '*';
-    board[7][6] = '*';
+    board[5][10] = '*';
+    board[6][11] = '*';
+    board[6][12] = '*';
+    board[7][10] = '*';
+    board[7][11] = '*';
 
     while (true) {
         display(board); 
         update(board);
-        usleep(60000); // ms 
+        usleep(50000); // Задержка в микросекундах
     }
 
     return 0;
