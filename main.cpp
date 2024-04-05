@@ -101,7 +101,7 @@ int main() {
     char board[ROWS][COLS] = {};
 
     // Загрузка начального состояния из BMP файла (пример)
-    readBMP("путь_к_вашему_файлу.bmp", board);
+    readBMP(game.bmp, board);
 
     while (true) {
         display(board); 
