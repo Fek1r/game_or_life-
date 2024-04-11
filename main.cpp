@@ -1,53 +1,79 @@
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <unistd.h>
+#include <iostream>  
+#include <fstream>  
+#include <vector>  
+#include <unistd.h>  
+#include <string>  
+#include <sstream>  
+#include <set>  
+#include <cstring> 
 
-using namespace std;
+using namespace std;  
 
-const int HEIGHT = 20;
-const int WIDTH = 40;
+const int HEIGHT = 20;  
+const int WIDTH = 40;  
 
-void display(char universe[HEIGHT][WIDTH]) {
-    system("clear"); // Clear the screen (works on Unix-like systems)
-    for (int i = 0; i < HEIGHT; ++i) {
-        for (int j = 0; j < WIDTH; ++j) {
-            cout << (universe[i][j] == '*' ? "\u25A0" : " ");
-        }
-        cout << endl;
-    }
-}
+set<int> stayAlive;  
+set<int> becomeAlive;  
 
-void update(char universe[HEIGHT][WIDTH]) {
-    char newUniverse[HEIGHT][WIDTH] = {};
-    for (int i = 0; i < HEIGHT; ++i) {
-        for (int j = 0; j < WIDTH; ++j) {
-            int liveNeighbors = 0;
-            for (int di = -1; di <= 1; ++di) {
-                for (int dj = -1; dj <= 1; ++dj) {
-                    if (di == 0 && dj == 0) continue;
-                    int ni = (i + di + HEIGHT) % HEIGHT;
-                    int nj = (j + dj + WIDTH) % WIDTH;
-                    if (universe[ni][nj] == '*') {
-                        liveNeighbors++;
-                    }
-                }
-            }
-            if (universe[i][j] == '*' && (liveNeighbors == 2 || liveNeighbors == 3)) {
-                newUniverse[i][j] = '*';
-            } else if (universe[i][j] == ' ' && liveNeighbors == 3) {
-                newUniverse[i][j] = '*';
-            } else {
-                newUniverse[i][j] = ' ';
-            }
-        }
-    }
-    for (int i = 0; i < HEIGHT; ++i) {
-        for (int j = 0; j < WIDTH; ++j) {
-            universe[i][j] = newUniverse[i][j];
-        }
-    }
-}
+void readRules(const string& filename) {  
+    ifstream rulesFile(filename);  
+    if (!rulesFile) {  
+        cerr << "Cannot open rules file" << endl;  
+        exit(1);  
+    }  
+    string line;  
+    while (getline(rulesFile, line)) {  
+        if (line[0] == '#' || line.empty()) continue;
+        istringstream iss(line);  
+        string type;  
+        int num;  
+        iss >> type;  
+        while (iss >> num) {  
+            if (type == "alive") {  
+                stayAlive.insert(num);  
+            } else if (type == "dead") {  
+                becomeAlive.insert(num);  
+            }  
+        }  
+    }  
+}  
+
+void display(char universe[HEIGHT][WIDTH]) {  
+    system("clear");  
+    for (int i = 0; i < HEIGHT; ++i) {  
+        for (int j = 0; j < WIDTH; ++j) {  
+            cout << (universe[i][j] == '*' ? "\u25A0" : " ");  
+        }  
+        cout << endl;  
+    }  
+}  
+
+void update(char universe[HEIGHT][WIDTH]) {  
+    char newUniverse[HEIGHT][WIDTH] = {};  
+    for (int i = 0; i < HEIGHT; ++i) {  
+        for (int j = 0; j < WIDTH; ++j) {  
+            int liveNeighbors = 0;  
+            for (int di = -1; di <= 1; ++di) {  
+                for (int dj = -1; dj <= 1; ++dj) {  
+                    if (di == 0 && dj == 0) continue;  
+                    int ni = (i + di + HEIGHT) % HEIGHT;  
+                    int nj = (j + dj + WIDTH) % WIDTH;  
+                    if (universe[ni][nj] == '*') {  
+                        liveNeighbors++;  
+                    }  
+                }  
+            }  
+            if (universe[i][j] == '*' && stayAlive.count(liveNeighbors)) {  
+                newUniverse[i][j] = '*';  
+            } else if (universe[i][j] == ' ' && becomeAlive.count(liveNeighbors)) {  
+                newUniverse[i][j] = '*';  
+            } else {  
+                newUniverse[i][j] = ' ';  
+            }  
+        }  
+    }  
+    memcpy(universe, newUniverse, sizeof(newUniverse));  
+}  
 
 void readBMP(const string& fileName, char universe[HEIGHT][WIDTH]) {
     ifstream bmpFile(fileName, ios::binary);
@@ -80,16 +106,17 @@ void readBMP(const string& fileName, char universe[HEIGHT][WIDTH]) {
     bmpFile.close();
 }
 
-int main() {
-    char universe[HEIGHT][WIDTH] = {};
+int main() {  
+    char universe[HEIGHT][WIDTH] = {};  
+    readBMP("game2.bmp", universe);
+    readRules("rules.txt");  
 
-    readBMP("game.bmp", universe);
+    while (true)
+    {  
+        display(universe);  
+        update(universe);  
+        usleep(200000);
+    }  
 
-    while (true) {
-        display(universe);
-        update(universe);
-        usleep(200000); // Microsecond delay for visualization of update
-    }
-
-    return 0;
+    return 0;  
 }
